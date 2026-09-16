@@ -1,0 +1,31 @@
+logging:
+  level: DEBUG
+  file: src/packing_robot_module/logs/packing_robot_module.log   # 로그 파일 경로 (상대경로면 실행 위치 기준). 비우면 콘솔만.
+  max_bytes: 5242880       # 파일 회전 크기 (5MB)
+  backup_count: 3          # 보관할 이전 로그 개수
+
+server:
+  host: 0.0.0.0
+  port: 5001
+
+robot:
+  robot_id: dsr01    # ROS namespace (슬래시 없음, DR_init.__dsr__id)
+  model: h2017       # 두산 로봇 모델 (DR_init.__dsr__model)
+
+motion:
+  home_joints_deg: [90,0,90,0,90,0]
+  joint_vel: 60.0            # deg/s
+  joint_acc: 60.0            # deg/s^2
+  line_vel: [250.0, 80.0]    # [mm/s, deg/s]
+  line_acc: [500.0, 160.0]
+  pick_approach_z_mm: 100.0  # pick approach는 프로토콜에 없어 pick + z offset으로 생성
+  base_rotation_deg: [0.0, 180.0, 0.0]  # (rz1_base, ry_base, rz2_base). JOB,BOX의 ang은 rz1에 더해짐
+  pick_approach1_y_offset_mm: -500.0  # approach1 = pick pose + (y offset, z offset)
+  pick_approach1_z_offset_mm: 300.0
+  pick_approach2_z_offset_mm: 300.0   # approach2 = pick pose + z offset
+
+gripper:
+  io_index: 5      # 컨트롤박스 디지털 출력 채널
+  settle_sec: 3.0  # 흡착/해제 안정화 대기
+
+default_packing_pose: [-516.0, -39.0, 631.0, 45.0, -180.0, -135.0]
