@@ -40,7 +40,7 @@ class TcpServer:
     def _serve_client(self, conn: socket.socket) -> None:
         def send(line: str) -> None:
             conn.sendall(line.encode(ENCODING) + DELIMITER)
-            log.info(">> %s", line)
+            log.debug(">> %s", line)
 
         buf = b""
         while True:
@@ -52,5 +52,5 @@ class TcpServer:
                 raw, buf = buf.split(DELIMITER, 1)
                 line = raw.decode(ENCODING, errors="replace").strip()
                 if line:
-                    log.info("<< %s", line)
+                    log.debug("<< %s", line)
                     self._handler.handle_line(line=line, send=send)

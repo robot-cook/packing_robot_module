@@ -18,7 +18,7 @@ setup(
     zip_safe=True,
     maintainer='cook',
     maintainer_email='cook@euler-robotics.com',
-    description='REQ_JOB/SET_PACK_POSE TCP server bridging clients to doosan-robot2',
+    description='SUBMIT_SEQUENCE/GET_SEQUENCE_STATUS TCP server bridging clients to doosan-robot2',
     license='Apache License 2.0',
     tests_require=['pytest'],
     entry_points={

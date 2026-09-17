@@ -33,6 +33,8 @@ class RosBridge:
 
         # DR_init 세팅 후에 import해야 두산 API가 이 노드에 바인딩된다.
         from DSR_ROBOT2 import (
+            DR_BASE,
+            DR_TOOL,
             ROBOT_MODE_AUTONOMOUS,
             get_current_solution_space,
             get_last_alarm,
@@ -43,6 +45,7 @@ class RosBridge:
             posx,
             set_digital_output,
             set_robot_mode,
+            trans,
         )
 
         self._movej = movej
@@ -51,6 +54,9 @@ class RosBridge:
         self._set_do = set_digital_output
         self._posj = posj
         self._posx = posx
+        self._trans = trans
+        self._DR_TOOL = DR_TOOL
+        self._DR_BASE = DR_BASE
         self._get_last_alarm = get_last_alarm
         self._get_current_solution_space = get_current_solution_space
 
@@ -120,6 +126,18 @@ class RosBridge:
             log.warning("movejx NOT REACHABLE (sol=%d), 다음 sol 시도", sol)
         log.error("movejx 실패: 모든 sol(0~7)에서 도달 불가 %s", pose)
         return False
+
+    def offset_along_tool(self, pose6: list[float], delta6: list[float]) -> list[float] | None:
+        """pose6의 회전을 반영해 tool 좌표계 기준 delta6만큼 이동한 pose를 base 좌표계로 계산한다."""
+        try:
+            ret = self._trans(self._posx(*pose6), self._posx(*delta6), ref=self._DR_TOOL, ref_out=self._DR_BASE)
+        except Exception as exc:
+            self._fail("trans", exc)
+            return None
+        if isinstance(ret, int):
+            self._fail("trans", RuntimeError(f"trans returned {ret}"))
+            return None
+        return list(ret)
 
     def gripper(self, on: bool, io_index: int, settle_sec: float) -> bool:
         try:

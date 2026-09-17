@@ -3,7 +3,7 @@
 <package format="3">
   <name>packing_robot_module</name>
   <version>0.0.1</version>
-  <description>REQ_JOB/SET_PACK_POSE TCP server bridging clients to doosan-robot2</description>
+  <description>SUBMIT_SEQUENCE/GET_SEQUENCE_STATUS TCP server bridging clients to doosan-robot2</description>
   <maintainer email="cook@euler-robotics.com">cook</maintainer>
   <license>Apache License 2.0</license>
 

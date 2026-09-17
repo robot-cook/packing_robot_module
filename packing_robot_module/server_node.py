@@ -42,7 +42,7 @@ def main() -> None:
 
     from .ros_bridge import RosBridge
 
-    parser = argparse.ArgumentParser(description="packing_robot_module REQ_JOB/SET_PACK_POSE TCP 서버")
+    parser = argparse.ArgumentParser(description="packing_robot_module SUBMIT_SEQUENCE/GET_SEQUENCE_STATUS TCP 서버")
     parser.add_argument("--config", default="src/packing_robot_module/config/config.yaml")
     argv = remove_ros_args(args=sys.argv)  # launch가 붙이는 --ros-args 제거
     args = parser.parse_args(argv[1:])
@@ -52,7 +52,7 @@ def main() -> None:
 
     robot_cfg = cfg["robot"]
     robot = RosBridge(robot_id=robot_cfg.get("robot_id", "dsr01"), robot_model=robot_cfg.get("model", "h2017"))
-    handler = JobHandler(cfg=cfg, robot=robot, config_path=args.config)
+    handler = JobHandler(cfg=cfg, robot=robot)
     handler.move_home()
     server_cfg = cfg["server"]
     server = TcpServer(host=server_cfg["host"], port=int(server_cfg["port"]), handler=handler)
