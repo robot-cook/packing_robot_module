@@ -10,7 +10,7 @@ server:
 
 robot:
   robot_id: dsr01    # ROS namespace (슬래시 없음, DR_init.__dsr__id)
-  model: h2017       # 두산 로봇 모델 (DR_init.__dsr__model)
+  model: a0912       # 두산 로봇 모델 (DR_init.__dsr__model)
 
 motion:
   home_joints_deg: [90,0,90,0,90,0]
