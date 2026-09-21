@@ -26,7 +26,7 @@ from moveit_msgs.srv import ApplyPlanningScene, GetStateValidity
 from shape_msgs.msg import SolidPrimitive
 from std_msgs.msg import Header
 
-log = logging.getLogger("randpal.ros_bridge")
+log = logging.getLogger("packing_robot_module.ros_bridge")
 
 # 이 환경(WSL2)에서 DDS 디스커버리가 느릴 수 있어(이전 세션에서 최대 45초까지 확인됨)
 # move_group 서비스 대기 타임아웃을 넉넉하게 잡는다.
@@ -159,7 +159,7 @@ class RosBridge:
         # /{robot_id}/...에 있다(start.launch.py에서 move_group의 namespace가 'name'
         # 인자 그대로라 dsr_controller2 세그먼트가 없음). 서로 namespace가 달라 노드를
         # 분리한다.
-        self.node = rclpy.create_node("randpal_ros_bridge", namespace=f"{robot_id}/dsr_controller2")
+        self.node = rclpy.create_node("packing_robot_ros_bridge", namespace=f"{robot_id}/dsr_controller2")
         setattr(DR_init, "__dsr__node", self.node)
         self._moveit_node = rclpy.create_node("packing_robot_moveit_bridge", namespace=robot_id)
 
