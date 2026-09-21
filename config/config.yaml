@@ -20,8 +20,22 @@ motion:
   line_acc: [500.0, 160.0]
   pick_approach_tool_base: [0.0, 0.0, -100, 0.0, 0.0, 0.0]
 
-  temp_pick_approach_y_offset_mm: -50.0  # approach1 = pick pose + (y offset, z offset)
-  temp_pick_approach_z_offset_mm: 50.0
+  temp_pick_approach_y_offset_mm: 0.0  # approach1 = pick pose + (y offset, z offset)
+  temp_pick_approach_z_offset_mm: 0.0
+
+  # MoveIt(move_group)의 0~1 스케일 팩터. 위 joint_vel/line_vel(deg/s, mm/s)은 DRL 전용
+  # 단위라 MoveIt 모션에는 적용되지 않고, 이 값이 모든 MoveIt 모션에 공통 적용된다.
+  moveit_velocity_scaling: 0.3
+  moveit_acceleration_scaling: 0.3
+
+# 정적 collision object (MoveIt planning scene에 시작 시 1회 등록). base_link 기준.
+# size_mm 중 0 이하가 있으면 미설정으로 보고 등록을 건너뛴다 - 크기/위치 확정 후 채울 것.
+collision_objects:
+  camera:
+    frame_id: base_link
+    size_mm: [50.0, 900.0, 50.0]      # TODO: 가로 x 깊이 x 높이
+    position_mm: [-700.0, 10.0, 1050.0]  # TODO: frame_id 기준 중심 좌표
+    rotation_deg: 0.0             # z축 회전
 
 gripper:
   io_index: 5      # 컨트롤박스 디지털 출력 채널
