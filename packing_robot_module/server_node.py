@@ -70,12 +70,9 @@ def main() -> None:
     _setup_logging(cfg_log=cfg.get("logging", {}))
 
     robot_cfg = cfg["robot"]
-    motion_cfg = cfg["motion"]
     robot = RosBridge(
         robot_id=robot_cfg.get("robot_id", "dsr01"),
         robot_model=robot_cfg.get("model", "h2017"),
-        moveit_velocity_scaling=motion_cfg.get("moveit_velocity_scaling", 0.3),
-        moveit_acceleration_scaling=motion_cfg.get("moveit_acceleration_scaling", 0.3),
     )
     _register_collision_objects(robot=robot, cfg=cfg.get("collision_objects", {}))
     handler = JobHandler(cfg=cfg, robot=robot)
