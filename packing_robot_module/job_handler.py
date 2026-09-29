@@ -149,31 +149,26 @@ class JobHandler:
 
         # pick pose의 tool z축(회전 반영) 기준으로 계산하는 최종 접근점. approach1/2와 달리
         # base 축 offset이 아니라 pose 회전을 반영해야 해서 trans()를 쓴다.
-        pick_approach = self.robot.offset_along_tool(pose6=pick_pose, delta6=motion["pick_approach_tool_base"])
+        # base 좌표계 x/y 보정. step 원본을 바꾸지 않도록 복사본에 적용한다.
+        pick_base = list(pick_pose)
+        pick_base[0] += motion["pick_offset"][0]
+        pick_base[1] += motion["pick_offset"][1]
+
+        # tool 좌표계 보정은 pose 회전을 반영해야 해서 trans()를 쓴다.
+        pick_target = self.robot.offset_along_tool(pose6=pick_base, delta6=motion["pick_offset_tool_base"])
+        if pick_target is None:
+            return self._fail(what="trans(pick_offset)")
+
+        pick_approach = self.robot.offset_along_tool(pose6=pick_target, delta6=motion["pick_approach_tool_base"])
         if pick_approach is None:
             return self._fail(what="trans(pick_approach)")
 
-        temp_pick_approach1 = list(pick_approach)
-        temp_pick_approach1[1] += motion["temp_pick_approach_y_offset_mm"]
-        temp_pick_approach1[2] += motion["temp_pick_approach_z_offset_mm"]
-
-        temp_pick_approach2 = list(pick_approach)
-        temp_pick_approach2[2] += motion["temp_pick_approach_z_offset_mm"]
-
-        log.info(f"Approach 1로 jx 이동: {temp_pick_approach1}")
-        if not self.robot.movejx(pose6=temp_pick_approach1, vel=joint_vel, acc=joint_acc):
-            return self._fail(what="movejx(approach1)")
-
-        log.info(f"Approach 2로 linear 이동: {temp_pick_approach2}")
-        if not self.robot.movel(pose6=temp_pick_approach2, vel=line_vel, acc=line_acc):
-            return self._fail(what="movel(approach2)")
-
-        log.info(f"Pick Approach로 linear 이동: {pick_approach}")
-        if not self.robot.movel(pose6=pick_approach, vel=line_vel, acc=line_acc):
+        log.info(f"Pick Approach로 jx 이동: {pick_approach}")
+        if not self.robot.movejx(pose6=pick_approach, vel=joint_vel, acc=joint_acc):
             return self._fail(what="movel(pick_approach)")
 
-        log.info(f"Pick으로 linear 이동: {pick_pose}")
-        if not self.robot.movel(pose6=pick_pose, vel=line_vel, acc=line_acc):
+        log.info(f"Pick Target으로 linear 이동: {pick_pose}")
+        if not self.robot.movel(pose6=pick_target, vel=line_vel, acc=line_acc):
             return self._fail(what="movel(pick)")
 
         log.info(f"Gripper On")
@@ -183,14 +178,6 @@ class JobHandler:
         log.info(f"Pick Approach로 linear 이동: {pick_approach}")
         if not self.robot.movel(pose6=pick_approach, vel=line_vel, acc=line_acc):
             return self._fail(what="movel(retreat pick_approach)")
-
-        log.info(f"Approach 2로 linear 이동: {temp_pick_approach2}")
-        if not self.robot.movel(pose6=temp_pick_approach2, vel=line_vel, acc=line_acc):
-            return self._fail(what="movel(retreat approach2)")
-
-        log.info(f"Approach 1로 linear 이동: {temp_pick_approach1}")
-        if not self.robot.movel(pose6=temp_pick_approach1, vel=line_vel, acc=line_acc):
-            return self._fail(what="movel(retreat approach1)")
 
         log.info(f"Release로 jx 이동: {release_pose}")
         if not self.robot.movejx(pose6=release_pose, vel=joint_vel, acc=joint_acc):
