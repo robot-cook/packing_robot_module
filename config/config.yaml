@@ -20,14 +20,14 @@ motion:
   home_joints_deg: [90,0,90,-180,-90,0]
   joint_vel: 30.0            # deg/s
   joint_acc: 30.0            # deg/s^2
-  line_vel: [250.0, 80.0]    # [mm/s, deg/s]
-  line_acc: [500.0, 160.0]
-  pick_approach_tool_base: [0.0, 0.0, -150, 0.0, 0.0, 0.0]
-  pick_offset_tool_base: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-  pick_offset: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-
-  temp_pick_approach_y_offset_mm: 0.0  # approach1 = pick pose + (y offset, z offset)
-  temp_pick_approach_z_offset_mm: 0.0
+  line_vel: [80.0, 40.0]    # [mm/s, deg/s]
+  line_acc: [100.0, 50.0]
+  pick_offset_x: 0.0
+  pick_offset_y: 0.0
+  release_approach_z: 150.0
+  pick_approach_tool_base: [0.0,0.0,-150.0,0.0,0.0,0.0]
+  pick_offset_tool_base: [0.0,0.0,10.0,0.0,0.0,0.0]
+  
 
 # 정적 collision object (MoveIt planning scene에 시작 시 1회 등록, movej/movel/movejx
 # 실행 전 충돌 검사에만 쓰임 - 실제 모션은 DSR_ROBOT2 네이티브로 실행). base_link 기준.
@@ -35,14 +35,16 @@ motion:
 collision_objects:
   upper_camera_frame:
     frame_id: base_link
-    size_mm: [80.0, 1000.0, 220.0]      # TODO: 가로 x 깊이 x 높이
-    position_mm: [-660.0, -20.0, 1070.0]  # TODO: frame_id 기준 중심 좌표
+    size_mm: [100.0, 2000.0, 250.0]      # TODO: 가로 x 깊이 x 높이
+    position_mm: [-600.0, 0.0, 1100.0]  # TODO: frame_id 기준 중심 좌표
     rotation_deg: 0.0             # z축 회전
   workbench:
     frame_id: base_link
     size_mm: [600, 1100, 35]
-    position_mm: [-650, 50, 35]
+    position_mm: [-620, 50, 35]
 
 gripper:
-  io_index: 5      # 컨트롤박스 디지털 출력 채널
-  settle_sec: 3.0  # 흡착/해제 안정화 대기
+  gripper_on_pin: 7
+  gripper_off_pin: 6
+  pin_settle_sec: 0.5
+  settle_sec: 1.5

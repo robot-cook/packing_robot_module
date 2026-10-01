@@ -7,6 +7,7 @@ import queue
 import threading
 from dataclasses import dataclass
 from typing import Callable
+import time
 
 from .protocol import (
     Sequence,
@@ -151,8 +152,8 @@ class JobHandler:
         # base 축 offset이 아니라 pose 회전을 반영해야 해서 trans()를 쓴다.
         # base 좌표계 x/y 보정. step 원본을 바꾸지 않도록 복사본에 적용한다.
         pick_base = list(pick_pose)
-        pick_base[0] += motion["pick_offset"][0]
-        pick_base[1] += motion["pick_offset"][1]
+        pick_base[0] += motion["pick_offset_x"]
+        pick_base[1] += motion["pick_offset_y"]
 
         # tool 좌표계 보정은 pose 회전을 반영해야 해서 trans()를 쓴다.
         pick_target = self.robot.offset_along_tool(pose6=pick_base, delta6=motion["pick_offset_tool_base"])
@@ -163,6 +164,9 @@ class JobHandler:
         if pick_approach is None:
             return self._fail(what="trans(pick_approach)")
 
+        release_approach = list(release_pose)
+        release_approach[2] +=  motion["release_approach_z"]
+
         log.info(f"Pick Approach로 jx 이동: {pick_approach}")
         if not self.robot.movejx(pose6=pick_approach, vel=joint_vel, acc=joint_acc):
             return self._fail(what="movel(pick_approach)")
@@ -172,20 +176,36 @@ class JobHandler:
             return self._fail(what="movel(pick)")
 
         log.info(f"Gripper On")
-        if not self.robot.gripper(on=True, io_index=gripper_cfg["io_index"], settle_sec=gripper_cfg["settle_sec"]):
-            return self._fail(what="gripper(on)")
+        if not self.robot.gripper(on=True, io_index=gripper_cfg["gripper_on_pin"], settle_sec=gripper_cfg["pin_settle_sec"]):
+            return self._fail(what="gripper(on), pin on")
+        if not self.robot.gripper(on=False, io_index=gripper_cfg["gripper_on_pin"], settle_sec=gripper_cfg["pin_settle_sec"]):
+            return self._fail(what="gripper(on), pin off")
+        time.sleep(gripper_cfg["settle_sec"])
+        
 
         log.info(f"Pick Approach로 linear 이동: {pick_approach}")
         if not self.robot.movel(pose6=pick_approach, vel=line_vel, acc=line_acc):
             return self._fail(what="movel(retreat pick_approach)")
 
-        log.info(f"Release로 jx 이동: {release_pose}")
-        if not self.robot.movejx(pose6=release_pose, vel=joint_vel, acc=joint_acc):
+        log.info(f"Release Approach로 jx 이동: {release_approach}")
+        if not self.robot.movejx(pose6=release_approach, vel=joint_vel, acc=joint_acc):
+            return self._fail(what="movejx(release_approach)")
+
+        log.info(f"Release로 linear 이동: {release_pose}")
+        if not self.robot.movel(pose6=release_pose, vel=line_vel, acc=line_acc):
             return self._fail(what="movejx(release_pose)")
 
         log.info(f"Gripper Off")
-        if not self.robot.gripper(on=False, io_index=gripper_cfg["io_index"], settle_sec=gripper_cfg["settle_sec"]):
-            return self._fail(what="gripper(off)")
+        if not self.robot.gripper(on=True, io_index=gripper_cfg["gripper_off_pin"], settle_sec=gripper_cfg["pin_settle_sec"]):
+            return self._fail(what="gripper(off), pin on")
+        if not self.robot.gripper(on=False, io_index=gripper_cfg["gripper_off_pin"], settle_sec=gripper_cfg["pin_settle_sec"]):
+            return self._fail(what="gripper(off), pin off")
+        time.sleep(gripper_cfg["settle_sec"])
+
+        log.info(f"Release Approach로 linear 이동: {release_approach}")
+        if not self.robot.movel(pose6=release_approach, vel=line_vel, acc=line_acc):
+            return self._fail(what="movejx(release_approach)")
+        
         return True
 
     def _fail(self, what: str) -> bool:
